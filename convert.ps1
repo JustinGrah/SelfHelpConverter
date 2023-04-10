@@ -58,16 +58,7 @@ function ConvertTo-CustomerReadyDoc() {
             $headingLevel = ($line.split('#').length - 1)
             Log -msg ('setting headinglevel: ' + $headingLevel) -lvl ([LogLevel]::Verbose)
             
-            if($isExcluded -eq $false) {
-                Log -msg ('line: ' + $line.toLower()) -lvl ([LogLevel]::Verbose)
-                if($line.toLower() -like '* !exclude') {
-                    # we are reaching a excluded line!
-                    Log -msg 'Found excluded line' -lvl ([LogLevel]::Verbose)
-                    $isExcluded = $true
-                    $headingLevelEx = $headingLevel
-                    Log -msg ('setting headinglevelEx: ' + $headingLevelEx) -lvl ([LogLevel]::Verbose)  
-                }
-            } else {
+            if($isExcluded) {
                 # we are in a excluded block. we need to understand if we want to remove the isExcluded flag
                 Log -msg ('headinglevel: ' + $headingLevel) -lvl ([LogLevel]::Verbose)   
                 Log -msg ('headinglevelex: ' + $headingLevel) -lvl ([LogLevel]::Verbose)   
@@ -77,6 +68,15 @@ function ConvertTo-CustomerReadyDoc() {
                     $isExcluded = $false
                     $headingLevelEx = 0
                 }
+            }
+
+            Log -msg ('line: ' + $line.toLower()) -lvl ([LogLevel]::Verbose)
+            if($line.toLower() -like '* !exclude') {
+                # we are reaching a excluded line!
+                Log -msg 'Found excluded line' -lvl ([LogLevel]::Verbose)
+                $isExcluded = $true
+                $headingLevelEx = $headingLevel
+                Log -msg ('setting headinglevelEx: ' + $headingLevelEx) -lvl ([LogLevel]::Verbose)  
             }
         }
 
