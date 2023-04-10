@@ -1,3 +1,7 @@
+param (
+    [switch]$initTool
+)
+
 $enableDebug = $false
 
 enum LogLevel {
@@ -16,7 +20,7 @@ function Log() {
         [LogLevel]$lvl
     )
 
-    $prefix = '[Wiki Publisher]'
+    $prefix = '[SHC]'
     $suffix = ''
 
     if($lvl -eq [LogLevel]::Info) {
@@ -24,7 +28,7 @@ function Log() {
     } elseif($lvl -eq [LogLevel]::Warning) {
         Write-Host ($prefix + ' [WARN] ' + $msg + $suffix) -ForegroundColor Yellow
     } elseif($lvl -eq [LogLevel]::Error) {
-        Write-Host ($prefix + ' [ERR] ' + $msg + $suffix) -ForegroundColor Red
+        Write-Host ($prefix + ' [ERROR] ' + $msg + $suffix) -ForegroundColor Red
     } elseif($lvl -eq [LogLevel]::Verbose -and $enableDebug) {
         Write-Host ($prefix + ' [VERBOSE] ' + $msg + $suffix) -ForegroundColor DarkBlue
     }
@@ -88,27 +92,46 @@ function ConvertTo-CustomerReadyDoc() {
     return @($cxReadyDoc,$intReadyDoc)
 }
 
+function Reconcile-Startup() {
+    Log -msg 'Reconciling startup' -lvl ([LogLevel]::Info)
+
+    if($initTool) {
+        Log -msg 'Preparing module for first use' -lvl ([LogLevel]::Info)
+        New-Item -Path $PSScriptRoot -Name 'article' -Type Directory -ErrorAction SilentlyContinue | Out-Null
+        New-Item -Path $PSScriptRoot -Name 'out' -Type Directory -ErrorAction SilentlyContinue  | Out-Null
+        
+        return $false
+    } elseif( (Test-Path -Path ($PSScriptRoot + '\article') ) -and (Test-Path -Path ($PSScriptRoot + '\out')) ) {
+        Log -msg 'Verifiying folders' -lvl ([LogLevel]::Info)
+        return $true
+    } 
+
+    Log -msg 'We are unable to detect the folders \article\ and \out\. Run the tool with the -initTool flag to create these folders' -lvl ([LogLevel]::Error)
+    return $false
+}
+
 Log -msg 'Starting up module' -lvl ([LogLevel]::Info)
-
-Log -msg 'Discovering articles to convert.' -lvl ([LogLevel]::Info)
-$pathArticle = Get-ChildItem -Path ($PSScriptRoot + '\article') -Filter '*.md'
-
-if($pathArticle.Length -gt 0) {
-
-    foreach($article in $pathArticle) {
-        Log -msg ('Converting article ' + $article.BaseName) -lvl ([LogLevel]::Info)
-        $articleContent = Get-Content -Path $article.FullName
-        $fileName = ($article.BaseName + '_cxReady.md')
-        $fileNameInt = ($article.BaseName + '_internal.md')
-
-        $docs = ConvertTo-CustomerReadyDoc -content $articleContent
-
-        Out-File -InputObject $docs[0] -FilePath ($PSScriptRoot + '\out\' + $fileName) -Encoding utf8 -Force
-        Out-File -InputObject $docs[1] -FilePath ($PSScriptRoot + '\out\' + $fileNameInt) -Encoding utf8 -Force
-
-        Log -msg ('Finished converting ' + $article.BaseName) -lvl ([LogLevel]::Info)
+if(Reconcile-Startup) {
+    Log -msg 'Discovering articles to convert.' -lvl ([LogLevel]::Info)
+    $pathArticle = Get-ChildItem -Path ($PSScriptRoot + '\article') -Filter '*.md'
+    
+    if($pathArticle.Length -gt 0) {
+    
+        foreach($article in $pathArticle) {
+            Log -msg ('Converting article ' + $article.BaseName) -lvl ([LogLevel]::Info)
+            $articleContent = Get-Content -Path $article.FullName
+            $fileName = ($article.BaseName + '_cxReady.md')
+            $fileNameInt = ($article.BaseName + '_internal.md')
+    
+            $docs = ConvertTo-CustomerReadyDoc -content $articleContent
+    
+            Out-File -InputObject $docs[0] -FilePath ($PSScriptRoot + '\out\' + $fileName) -Encoding utf8 -Force
+            Out-File -InputObject $docs[1] -FilePath ($PSScriptRoot + '\out\' + $fileNameInt) -Encoding utf8 -Force
+    
+            Log -msg ('Finished converting ' + $article.BaseName) -lvl ([LogLevel]::Info)
+        }
+    
+    } else {
+        Log -msg 'No articles found' -lvl ([LogLevel]::Warning)
     }
-
-} else {
-    Log -msg 'No articles found' -lvl ([LogLevel]::Warning)
 }

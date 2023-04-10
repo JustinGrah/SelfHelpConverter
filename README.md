@@ -12,9 +12,10 @@ that way, all sub-sections are excluded as well.
 1. Create a markdown file that describes the issue and some steps to resoultion
 2. Identify which topics we shall not share with the customer. i.e. links etc. to special internal pages etc.
 3. Mark these sections with a `! EXCLUDE` tag at the end
-4. Put the article in the `\article\` dir
-5. Run the script
-6. Grab the cx ready articel from `\out\`
+4. Dowload the latest version and (only when executing the script the first time) run it with the `-initTool` flag
+5. Put the article in the `\article\` dir
+6. Run the script (without any flags)
+7. Grab the cx ready articel from `\out\`
 
 ### Sample scenario:
 In this example we are showcasing on how to convert an article from a general format in to internal and cx ready information.
@@ -67,6 +68,23 @@ Yey - you should be able to reach this point when publishing this article.
 
 ## Thank you all! 
 ```
+
+**What it looks like from PowerShell**
+```plaintext
+PS > .\convert.ps1 -initTool
+[SHC] [INFO] Starting up module
+[SHC] [INFO] Reconciling startup
+[SHC] [INFO] Preparing module for first use
+PS > 
+PS > 
+PS > .\convert.ps1
+[SHC] [INFO] Starting up module
+[SHC] [INFO] Reconciling startup
+[SHC] [INFO] Verifiying folders
+[SHC] [INFO] Discovering articles to convert.
+[SHC] [INFO] Converting article sample
+[SHC] [INFO] Finished converting sample
+``` 
 
 ## Purpose and usecases
 Generating wiki articles and customer self-help articles is a time consuming task. Using this script, we are effectivley reducing the amout of effort put in both wiki articles and customer facing documents. This allows us to be consistent with our articles and at the same time, reducing the time required to write both.
