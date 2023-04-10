@@ -70,7 +70,7 @@ Yey - you should be able to reach this point when publishing this article.
 ```
 
 **What it looks like from PowerShell**
-```
+```plaintext
 PS > .\convert.ps1 -initTool
 [SHC] [INFO] Starting up module
 [SHC] [INFO] Reconciling startup
